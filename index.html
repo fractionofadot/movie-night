@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript" src="https://sortablejs.github.io/Sortable/Sortable.js"></script>
+	<style type="text/css">
+		#movie_list li {
+			width: 300px;
+			height: 100px;
+			background: lightblue;
+			margin: 10px;
+			justify-content: center;
+      		align-items: center;
+      		cursor: grab;
+      		display: flex;
+		}
+
+		input[type=submit] {
+			background-color: #04AA6D;
+			border: none;
+			color: white;
+			padding: 16px 32px;
+			text-decoration: none;
+			margin: 4px 2px;
+			cursor: pointer;
+		}
+	</style>
+
+	<title>Movie Night</title>
+</head>
+<body>
+	<div id="session_info">
+		<form id="session_input">
+			<label for="session">Session ID: </label>
+			<input id="session_id" type="text" name="session">
+			<input type="submit" name="submit" value="Enter">
+		</form>
+	</div>
+	<div>
+		<form id="movie_input">
+			<label for="movie title">Enter a movie: </label>
+			<input name="movie title" type="text" id="movie_text">
+			<input type="submit" value="Enter">
+		</form>
+	</div>
+	<div>
+		<ul id="movie_list">
+			<li>Miracle on 34th St</li>
+		</ul>
+	</div>
+</body>
+
+
+<script type="text/javascript">
+	var movie_input = document.getElementById("movie_input");
+	var movie_list = document.getElementById("movie_list");
+	var movie_text = document.getElementById("movie_text");
+
+	var session_input = document.getElementById("session_input");
+	var session_id = document.getElementById("session_id");
+	var session_info = document.getElementById("session_info");
+	
+	movie_input.addEventListener("submit", addMovie);
+	session_input.addEventListener("submit", joinSession);
+
+	new Sortable(movie_list, {
+		animation:100,
+		ghostClass: 'blue-background-class',
+		onUpdate: update
+	});
+
+	function update(ev) {
+		var items = Array.from(movie_list.children);
+		var id_list = new Array(items.length);
+		for (var i = items.length - 1; i >= 0; i--) {
+				id_list[i] = items[i].id;
+			}
+		console.log(id_list);
+	}
+
+	function save(user, item) {
+		window.localStorage.setItem(user, item);
+	}
+
+	function addMovie(event) {
+		event.preventDefault();
+		var title = movie_text.value;
+		if (title) {
+			const movie = document.createElement('li');
+			movie.textContent = title;
+			movie.id = movie_list.children.length;
+	        movie_list.appendChild(movie);
+	        movie_text.value = '';
+		}
+	}
+
+	function joinSession(event) {
+		event.preventDefault();
+		var id = session_id.value;
+		if (id) {
+			const session_display = document.createElement('h1');
+			session_display.textContent = id;
+			session_info.appendChild(session_display);
+			session_input.style.display = 'none';
+		}
+		
+	}
+	
+</script>
+</html>
