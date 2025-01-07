@@ -36,11 +36,17 @@ function addUser(username, db) {
 	let movie_ids = db.movies.map(movie => movie.id);
   if (! Object.values(db.users).includes(username) ) {
     db.users.push({name: username, rankings: movie_ids})
+  } else {
+  	return false;
   };
   return db;
 }
 
 function deleteUserByName(username, db) {
+	if (db.users.length === 1) {
+		console.log("Error: Can not delete the user. Must have at least one user.");
+		return false;
+	}
 	for (var i = db.users.length - 1; i >= 0; i--) {
 		if (db.users[i].name === username) {
 			db.users.splice(i,1);
@@ -116,10 +122,11 @@ function changeMovieTitle(movie_id, new_title, db) {
 
 function getMovieById(movie_id, db) {
 	for (var i = db.movies.length - 1; i >= 0; i--) {
-		if (db.movies[i].id === movie_id) {
+		if (db.movies[i].id === parseInt(movie_id)) {
 			return db.movies[i];
-		} 
+		}
 	}
+	console.log("Error: could not find movie with id", movie_id);
 }
 
 function getMovieByTitle(movie_title, db) {

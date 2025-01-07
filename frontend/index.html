@@ -30,12 +30,9 @@
 	<title>Movie Night</title>
 </head>
 <body>
-	<div id="session_info">
-		<form id="session_input">
-			<label for="session">Session ID: </label>
-			<input id="session_id" type="text" name="session">
-			<input type="submit" name="submit" value="Enter">
-		</form>
+	<div>
+		<ul id="user_list">			
+		</ul>
 	</div>
 	<div>
 		<form id="movie_input">
@@ -46,23 +43,25 @@
 	</div>
 	<div>
 		<ul id="movie_list">
-			<li>Miracle on 34th St</li>
 		</ul>
 	</div>
 </body>
 
-
+<script type="text/javascript" src="single-device.js"></script>
 <script type="text/javascript">
 	var movie_input = document.getElementById("movie_input");
 	var movie_list = document.getElementById("movie_list");
 	var movie_text = document.getElementById("movie_text");
 
-	var session_input = document.getElementById("session_input");
-	var session_id = document.getElementById("session_id");
-	var session_info = document.getElementById("session_info");
+	var user_list = document.getElementById("user_list");
+
 	
-	movie_input.addEventListener("submit", addMovie);
-	session_input.addEventListener("submit", joinSession);
+	movie_input.addEventListener("submit", addMovieToList);
+
+	let db = initDB();
+	let active_user = db.users[0];
+	refreshDBDisplay();
+
 
 	new Sortable(movie_list, {
 		animation:100,
@@ -76,35 +75,63 @@
 		for (var i = items.length - 1; i >= 0; i--) {
 				id_list[i] = items[i].id;
 			}
-		console.log(id_list);
+		updateUserRankings(active_user.name, id_list, db);
+		refreshDBDisplay();
 	}
 
 	function save(user, item) {
 		window.localStorage.setItem(user, item);
 	}
 
-	function addMovie(event) {
+	function refreshDBDisplay(active_user=db.users[0]) {
+		movie_list.innerHTML = '';
+
+		let rankings = active_user.rankings;
+		for (var i = 0; i <= rankings.length - 1; i++) {
+			let movie = getMovieById(rankings[i], db);
+
+			item = document.createElement('li');
+			item.textContent = movie.title;
+			item.id = movie.id;
+			movie_list.appendChild(item);
+		}
+
+		user_list.innerHTML = '';
+		for (var i = db.users.length - 1; i >= 0; i--) {
+			let name = db.users[i].name;
+
+			const user = document.createElement('li');
+			user.textContent = name;
+	        user_list.appendChild(user);
+		}
+	}
+
+	function addMovieToList(event) {
 		event.preventDefault();
 		var title = movie_text.value;
 		if (title) {
+			createMovie(title, db);
 			const movie = document.createElement('li');
 			movie.textContent = title;
-			movie.id = movie_list.children.length;
+			movie.id = getMovieByTitle(title, db).id;
 	        movie_list.appendChild(movie);
 	        movie_text.value = '';
 		}
 	}
 
-	function joinSession(event) {
-		event.preventDefault();
-		var id = session_id.value;
-		if (id) {
-			const session_display = document.createElement('h1');
-			session_display.textContent = id;
-			session_info.appendChild(session_display);
-			session_input.style.display = 'none';
-		}
-		
+	function initDB() {
+		let database = {
+			users: [], 
+			movies: []
+		};
+		addUser("PurpleFlower", database);
+		return database;
+	}
+
+	function addUserToList(new_username) {
+		const user = document.createElement('li');
+		user.textContent = new_username;
+        user_list.appendChild(user);
 	}
 	
 </script>
