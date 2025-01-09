@@ -104,7 +104,8 @@ function deleteMovieById(movie_id, db) {
 			db.movies.splice(i,1);
 			// also remove from user rankings
 			for (var j = db.users.length - 1; j >= 0; j--) {
-				db.users[j].rankings
+				let ranks = db.users[j].rankings;
+				ranks.splice( ranks.findIndex( id => id === movie_id ), 1 );
 			}
 		} 
 	}
@@ -138,7 +139,14 @@ function getMovieByTitle(movie_title, db) {
 }
 
 function tabulateRankings(db) {
-
+	for (var i = db.movies.length - 1; i >= 0; i--) {
+		let movie = db.movies[i];
+		movie.score = 0;
+		for (var j = db.users.length - 1; j >= 0; j--) {
+			let rankings = db.users[j].rankings;
+			movie.score = movie.score + rankings.findIndex( id => id === parseInt(movie.id) );
+		}
+	}
 }
 
 function updateUserRankings(username, new_rankings, db) {
