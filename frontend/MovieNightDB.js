@@ -19,7 +19,13 @@ class MovieNightDB {
   }
 
   removeUser(id_to_remove) {
-
+    for (var i = this.db.users.length - 1; i >= 0; i--) {
+      if (this.db.users[i].id === id_to_remove) {
+        this.db.users.splice(i,1);
+        return true;
+      } 
+    }
+    return false;
   }
 
   addMovie(movie_title) {
@@ -34,15 +40,33 @@ class MovieNightDB {
   }
 
   removeMovie(id_to_remove) {
-
+    for (var i = this.db.movies.length - 1; i >= 0; i--) {
+      if (this.db.movies[i].id === parseInt(id_to_remove)) {
+        this.db.movies.splice(i,1);
+        return true;
+      } 
+    }
+    return false;
   }
 
   renameUser(user_id, new_username) {
-
+    for (var i = this.db.users.length - 1; i >= 0; i--) {
+      if (this.db.users[i].id === parseInt(user_id)) {
+        this.db.users[i].name = new_username;
+      } 
+      return true;
+    }
+    return false;
   }
 
   renameMovie(movie_id, new_title) {
-
+    for (var i = this.db.movies.length - 1; i >= 0; i--) {
+      if (this.db.movies[i].id === movie_id) {
+        this.db.movies[i].title = new_title;
+        return true;
+      } 
+    }
+    return false;
   }
 
   userIdList() {
@@ -88,6 +112,7 @@ class MovieNightDB {
       let new_score = keys(this.db.users[i].scores).length;
       this.db.users[i].scores[movie_id] = new_score;
     }
+    return true;
   }
 
 } // end Class

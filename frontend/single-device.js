@@ -115,7 +115,7 @@ function deleteMovieById(movie_id, db) {
 function changeMovieTitle(movie_id, new_title, db) {
 	for (var i = db.movies.length - 1; i >= 0; i--) {
 		if (db.movies[i].id === movie_id) {
-			db.movies[i].name = new_title;
+			db.movies[i].title = new_title;
 		} 
 	}
 	return db;
