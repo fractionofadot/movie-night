@@ -1,43 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script type="text/javascript" src="https://sortablejs.github.io/Sortable/Sortable.js"></script>
-	<style type="text/css">
-		#movie_list li {
-			width: 300px;
-			height: 100px;
-			background: lightblue;
-			margin: 10px;
-			justify-content: center;
-      		align-items: center;
-      		cursor: grab;
-      		display: flex;
-		}
-
-		input[type=submit] {
-			background-color: #04AA6D;
-			border: none;
-			color: white;
-			padding: 16px 32px;
-			text-decoration: none;
-			margin: 4px 2px;
-			cursor: pointer;
-		}
-	</style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="app.css" />
 
 	<title>Movie Night</title>
 </head>
 <body>
+	<div>
+		<input id="new_user_button" type="submit" value="Add New User">
+	</div>
 	<div>
 		<ul id="user_list">			
 		</ul>
 	</div>
 	<div>
 		<form id="movie_input">
-			<label for="movie title">Enter a movie: </label>
-			<input name="movie title" type="text" id="movie_text">
+			<input name="movie title" type="text" id="movie_text" placeholder="Movie Title">
 			<input type="submit" value="Enter">
 		</form>
 	</div>
@@ -47,21 +27,28 @@
 	</div>
 </body>
 
-<script type="text/javascript" src="single-device.js"></script>
-<script type="text/javascript" src="single-device-class.js"></script>
+<!-- <script type="text/javascript" src="single-device.js"></script> -->
+<script type="text/javascript" src="MovieNightDB.js"></script>
+<script type="text/javascript" src="Sortable.js"></script>
 <script type="text/javascript">
-	var movie_input = document.getElementById("movie_input");
-	var movie_list = document.getElementById("movie_list");
-	var movie_text = document.getElementById("movie_text");
+	let movie_input = document.getElementById("movie_input");
+	let movie_list = document.getElementById("movie_list");
+	let movie_text = document.getElementById("movie_text");
 
-	var user_list = document.getElementById("user_list");
+	let user_list = document.getElementById("user_list");
+	let newUserButton = document.getElementById("new_user_button");
 
 	
 	movie_input.addEventListener("submit", addMovieToList);
+	newUserButton.addEventListener("click", addUserToList);
+	user_list.addEventListener("click", changeActiveUser);
 
-	let db = initDB();
-	let active_user = db.users[0];
-	refreshDBDisplay();
+
+	const MDB = new MovieNightDB();
+
+	let active_user = MDB.allUsers[0];
+
+	refreshDBDisplay(active_user);
 
 
 	new Sortable(movie_list, {
@@ -72,68 +59,69 @@
 
 	function update(ev) {
 		var items = Array.from(movie_list.children);
-		var id_list = new Array(items.length);
-		for (var i = items.length - 1; i >= 0; i--) {
-				id_list[i] = parseInt(items[i].id);
-			}
-		updateUserRankings(active_user.name, id_list, db);
-		tabulateRankings(db);
-		refreshDBDisplay();
+
+		for (var i = 0; i < items.length; i++) {
+			movie_id = parseInt(items[i].id);
+			score = i;
+			MDB.setMovieScore( active_user_id, movie_id, score );
+		}
+		// tabulateRankings(db);
+		// refreshDBDisplay();
 	}
 
-	function save(user, item) {
-		window.localStorage.setItem(user, item);
+	function save(id, item) {
+		window.localStorage.setItem(id, item);
 	}
 
-	function refreshDBDisplay(active_user=db.users[0]) {
+	function refreshDBDisplay(user) {
 		movie_list.innerHTML = '';
 
-		let rankings = active_user.rankings;
-		for (var i = 0; i <= rankings.length - 1; i++) {
-			let movie = getMovieById(rankings[i], db);
-
+		let scores = user.scores;
+		for (id in scores) {
+			let movie = MDB.getMovieById(id);
 			item = document.createElement('li');
 			item.textContent = movie.title;
-			item.id = movie.id;
+			item.id = id;
 			movie_list.appendChild(item);
 		}
 
 		user_list.innerHTML = '';
-		for (var i = db.users.length - 1; i >= 0; i--) {
-			let name = db.users[i].name;
+		let users = MDB.allUsers;
 
-			const user = document.createElement('li');
-			user.textContent = name;
-	        user_list.appendChild(user);
-		}
+		for (uid in users) {
+			const item = document.createElement('li');
+			item.textContent = users[uid].name;
+			item.id = uid;
+	        user_list.appendChild(item);
+		}; 
 	}
 
 	function addMovieToList(event) {
 		event.preventDefault();
 		var title = movie_text.value;
 		if (title) {
-			createMovie(title, db);
+			let id = MDB.addMovie(title)
+
 			const movie = document.createElement('li');
 			movie.textContent = title;
-			movie.id = getMovieByTitle(title, db).id;
+			movie.id = id;
 	        movie_list.appendChild(movie);
 	        movie_text.value = '';
 		}
 	}
 
-	function initDB() {
-		let database = {
-			users: [], 
-			movies: []
-		};
-		addUser("PurpleFlower", database);
-		return database;
+	function addUserToList(event) {
+		let new_username = prompt("Enter user name");
+		if (new_username) {
+			let id = MDB.addUser(new_username);
+			const user = document.createElement('li');
+			user.textContent = new_username;
+			user_list.appendChild(user);
+		}
 	}
 
-	function addUserToList(new_username) {
-		const user = document.createElement('li');
-		user.textContent = new_username;
-        user_list.appendChild(user);
+	function changeActiveUser(new_user_id) {
+
 	}
 	
 </script>
