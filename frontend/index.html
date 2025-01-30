@@ -9,17 +9,18 @@
 </head>
 <body>
 	<div>
+		<h1>Movie Night</h1>
+	</div>
+	<div id="winner">
+
+	</div>
+	<div id="addButtons">
 		<input id="new_user_button" type="submit" value="Add New User">
+		<input id="new_movie_button" type="submit" value="Add New Movie">
 	</div>
 	<div>
 		<ul id="user_list">			
 		</ul>
-	</div>
-	<div>
-		<form id="movie_input">
-			<input name="movie title" type="text" id="movie_text" placeholder="Movie Title">
-			<input type="submit" value="Enter">
-		</form>
 	</div>
 	<div>
 		<ul id="movie_list">
@@ -31,24 +32,22 @@
 <script type="text/javascript" src="MovieNightDB.js"></script>
 <script type="text/javascript" src="Sortable.js"></script>
 <script type="text/javascript">
-	let movie_input = document.getElementById("movie_input");
-	let movie_list = document.getElementById("movie_list");
-	let movie_text = document.getElementById("movie_text");
 
+	let movie_list = document.getElementById("movie_list");
 	let user_list = document.getElementById("user_list");
 	let newUserButton = document.getElementById("new_user_button");
+	let newMovieButton = document.getElementById("new_movie_button");
 
-	
-	movie_input.addEventListener("submit", addMovieToList);
 	newUserButton.addEventListener("click", addUserToList);
+	newMovieButton.addEventListener("click", addMovieToList);
 	user_list.addEventListener("click", changeActiveUser);
 
 
 	const MDB = new MovieNightDB();
 
-	let active_user = MDB.allUsers[0];
+	let active_user_id = MDB.userIdList[0];
 
-	refreshDBDisplay(active_user);
+	refreshDBDisplay(active_user_id);
 
 
 	new Sortable(movie_list, {
@@ -73,55 +72,111 @@
 		window.localStorage.setItem(id, item);
 	}
 
-	function refreshDBDisplay(user) {
+	function refreshDBDisplay(uid) {
 		movie_list.innerHTML = '';
-
-		let scores = user.scores;
-		for (id in scores) {
-			let movie = MDB.getMovieById(id);
+		let scores = MDB.getUserScoreList(uid);
+		for (let i = 0; i < scores.length; i++) {
+			let movie_id = scores[i];
+			let movie = MDB.getMovieById(movie_id);
 			item = document.createElement('li');
 			item.textContent = movie.title;
-			item.id = id;
+			item.id = movie_id;
 			movie_list.appendChild(item);
 		}
 
-		user_list.innerHTML = '';
 		let users = MDB.allUsers;
 
+		user_list.innerHTML = '';
 		for (uid in users) {
 			const item = document.createElement('li');
 			item.textContent = users[uid].name;
 			item.id = uid;
+			if (uid === active_user_id) {
+				item.classList.add("activeUser");
+			}
+			item.style.backgroundColor = userColor(uid);
 	        user_list.appendChild(item);
 		}; 
 	}
 
 	function addMovieToList(event) {
 		event.preventDefault();
-		var title = movie_text.value;
-		if (title) {
-			let id = MDB.addMovie(title)
-
+		const title = prompt("What's the name of the movie/show?");
+		if (! title ) {
+			return false;
+		}
+		const id = MDB.addMovie(title)
+		if (id) {
 			const movie = document.createElement('li');
 			movie.textContent = title;
 			movie.id = id;
 	        movie_list.appendChild(movie);
-	        movie_text.value = '';
+		} else{
+			alert("Oops! That movie is already in the list.\nGreat minds think alike \n(... and small minds seldom differ).")
 		}
 	}
 
 	function addUserToList(event) {
 		let new_username = prompt("Enter user name");
-		if (new_username) {
-			let id = MDB.addUser(new_username);
+		if (! new_username ) {
+			return false;
+		}
+		const id = MDB.addUser(new_username);
+		if (id) {
 			const user = document.createElement('li');
 			user.textContent = new_username;
+			user.id = id;
+			user.style.backgroundColor = userColor(id);
 			user_list.appendChild(user);
+		} else {
+			alert("Oops! Someone else took that name.\nGreat minds think alike \n(... and small minds seldom differ")
 		}
 	}
 
-	function changeActiveUser(new_user_id) {
+	function changeActiveUser(event) 
+	{
+		
+		if (event.target.id != 'user_list') {
+			let new_user_id = event.target.id;
+			active_user_id = new_user_id;
+			refreshDBDisplay(new_user_id);
+		}
+		
+	}
 
+	function theme(name) {
+		const themes = {
+			"ocean": { 
+				titles: "#4F9EDB", 
+				buttons: "#594FDB",
+				user: "#A3B2DE"
+			}, 
+			"desert": {
+				titles: "#DBC04F",
+				buttons: "#DB844F",
+				user: "#E0AB35"
+			}
+		}
+
+		if (Object.keys(themes).includes(name)) {
+			return themes[name];
+		}
+		console.warn("No theme named", name)
+		return false;
+
+	}
+
+	function userColor(id) {
+		const colors = ["#C9DB4F", "#DB824F", "#4FDBDB", "#A24FDB", "#5F9C9B", "#85896A", "#866C5D", "#765D86", "#4F5C5C", "#313327"];
+		return colors[id%9];
+	}
+
+	function displayWinner() {
+		const winner_div = document.getElementById("winner");
+		const scores = MDB.scores;
+		for (let id in scores) {
+			console.log(MDB.getMovieById(id).title, scores[id]);
+		}
 	}
 	
 </script>
