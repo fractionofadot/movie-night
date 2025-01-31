@@ -15,8 +15,9 @@
 
 	</div>
 	<div id="addButtons">
-		<input id="new_user_button" type="submit" value="Add New User">
-		<input id="new_movie_button" type="submit" value="Add New Movie">
+		<input id="new_user_button" type="submit" value="Add New User" />
+		<input id="new_movie_button" type="submit" value="Add New Movie" />
+		<input id="score_button" type="submit" value="Show Scores" />
 	</div>
 	<div>
 		<ul id="user_list">			
@@ -41,6 +42,7 @@
 	newUserButton.addEventListener("click", addUserToList);
 	newMovieButton.addEventListener("click", addMovieToList);
 	user_list.addEventListener("click", changeActiveUser);
+	document.getElementById("score_button").addEventListener("click", displayWinner);
 
 
 	const MDB = new MovieNightDB();
@@ -171,11 +173,14 @@
 		return colors[id%9];
 	}
 
-	function displayWinner() {
-		const winner_div = document.getElementById("winner");
+	function displayWinner(event) {
+		const winner = document.getElementById("winner");
+		winner.innerHTML = '';
 		const scores = MDB.scores;
 		for (let id in scores) {
-			console.log(MDB.getMovieById(id).title, scores[id]);
+			const item = document.createElement("li");
+			item.textContent = "Score: " + scores[id] + " " + MDB.getMovieById(id).title;
+			winner.appendChild(item);
 		}
 	}
 	
