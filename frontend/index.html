@@ -130,6 +130,8 @@
 			user.id = id;
 			user.style.backgroundColor = userColor(id);
 			user_list.appendChild(user);
+			active_user_id = id;
+			refreshDBDisplay(id);
 		} else {
 			alert("Oops! Someone else took that name.\nGreat minds think alike \n(... and small minds seldom differ")
 		}
@@ -137,7 +139,6 @@
 
 	function changeActiveUser(event) 
 	{
-		
 		if (event.target.id != 'user_list') {
 			let new_user_id = event.target.id;
 			active_user_id = new_user_id;
@@ -177,11 +178,17 @@
 		const winner = document.getElementById("winner");
 		winner.innerHTML = '';
 		const scores = MDB.scores;
+		let lowest = Infinity;
+		let highlight;
 		for (let id in scores) {
 			const item = document.createElement("li");
 			item.textContent = "Score: " + scores[id] + " " + MDB.getMovieById(id).title;
+			item.id = "movie_" + id;
+			if (lowest > scores[id]) { lowest = scores[id]; highlight = item.id; }
 			winner.appendChild(item);
 		}
+
+		document.getElementById(highlight).classList.add("highlight");
 	}
 	
 </script>

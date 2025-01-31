@@ -1,7 +1,7 @@
 class MovieNightDB {
   constructor() {
     this.users = {0: {
-      name: "Default User", 
+      name: "Me", 
       scores: {0: 0} 
     } };
     this.movies = {0: {
